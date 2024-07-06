@@ -42,7 +42,7 @@ def set_page(page_name):
 page = st.sidebar.selectbox('Select a page:', ['Home', 'Medical History', 'Symptoms', 'Screening', 'Results', 'Feedback'], key='page_select', on_change=lambda: set_page(st.session_state.page_select))
 
 if page == 'Home':
-    st.title('Breast Cancer Risk Assessment App')
+    st.title('Breast Cancer Risk Prediction App 1.0')
     st.image('https://homecare-aid.com/wp-content/uploads/2024/04/women-hands-holding-pink-breast-cancer-ribbon-stan-2022-12-16-07-16-23-utc-1-1024x682.jpg', caption='Breast Cancer Awareness', use_column_width=True)
     st.markdown("""
     ### Educational Resources
