@@ -5,8 +5,6 @@ from sklearn.tree import DecisionTreeClassifier
 import plotly.express as px
 
 # Initialize session state variables
-if 'page' not in st.session_state:
-    st.session_state.page = 0
 if 'history_diagnosed' not in st.session_state:
     st.session_state.history_diagnosed = ''
 if 'history_biopsies' not in st.session_state:
@@ -30,8 +28,11 @@ if 'screening_other_tests' not in st.session_state:
 if 'feedback' not in st.session_state:
     st.session_state.feedback = ''
 
+# Define a function to set the current page
+def set_page(page_name):
+    st.session_state.page = page_name
+
 # Train a simple model (for demonstration purposes)
-# Create synthetic data
 np.random.seed(42)
 data = pd.DataFrame({
     'history_diagnosed': np.random.randint(0, 2, 100),
@@ -55,169 +56,124 @@ y = data['diagnosis']
 model = DecisionTreeClassifier()
 model.fit(X, y)
 
-def show_home():
+# Streamlit app layout
+if 'page' not in st.session_state:
+    set_page('Home')
+
+if st.session_state.page == 'Home':
     st.title('Breast Cancer Risk Assessment App')
-    st.image("https://homecare-aid.com/wp-content/uploads/2024/04/women-hands-holding-pink-breast-cancer-ribbon-stan-2022-12-16-07-16-23-utc-1-1024x682.jpg", use_column_width=True)
-    st.write("**Welcome to the Breast Cancer Risk Assessment App**")
+    st.image('https://homecare-aid.com/wp-content/uploads/2024/04/women-hands-holding-pink-breast-cancer-ribbon-stan-2022-12-16-07-16-23-utc-1-1024x682.jpg')
     st.write("""
-        Breast cancer is one of the most common cancers affecting women worldwide. Early detection and awareness are crucial in improving survival rates and outcomes. This app is designed to help you understand your personal risk factors for breast cancer by guiding you through a series of questions related to your medical history, symptoms, and screening practices. By providing accurate information, you can take proactive steps towards early detection and seek medical advice promptly if necessary.
-        
-        Our goal is to empower you with knowledge and resources to make informed decisions about your health. This app not only offers a personalized risk assessment but also provides educational resources, personalized suggestions, and access to support networks. We believe that with the right information and support, you can take charge of your breast health and contribute to the fight against breast cancer. Thank you for using our app, and we hope it serves as a valuable tool in your journey towards better health.
-    """)
-    st.write("### Educational Resources")
-    st.write("""
+    Welcome to the Breast Cancer Risk Assessment App. This tool is designed to help you evaluate your risk factors for breast cancer based on your medical history, symptoms, and screening practices. 
+    Please answer all the questions in each section to receive personalized suggestions.
+
+    Early detection and prevention are key to fighting breast cancer. This app will provide you with insights and recommendations that you can discuss with your healthcare provider.
+    
     Here we provide the link for you as the resources and getting help from the worldwide support!
+
+    ### Educational Resources
     - [Breast Cancer Information](https://www.cancer.org/cancer/breast-cancer.html)
     - [Preventive Measures](https://www.breastcancer.org/research-news/prevention)
     - [Support Groups](https://www.breastcancer.org/community/support)
     """)
     if st.button('Start Assessment'):
-        st.session_state.page = 1
-        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
+        set_page('Personal and Family Medical History')
 
-def show_history():
+if st.session_state.page == 'Personal and Family Medical History':
     st.header('Personal and Family Medical History')
-    st.session_state.history_diagnosed = st.selectbox(
-        'Have you ever been diagnosed with breast cancer or any other type of cancer before?',
-        ['', 'No', 'Yes'],
-        key='history_diagnosed'
-    )
-    st.session_state.history_biopsies = st.selectbox(
-        'Have you had any previous breast biopsies or surgeries?',
-        ['', 'No', 'Yes'],
-        key='history_biopsies'
-    )
-    st.session_state.history_family = st.selectbox(
-        'Do you have a family history of breast cancer (e.g., mother, sister, daughter)?',
-        ['', 'No', 'Yes'],
-        key='history_family'
-    )
-    if st.button('Next'):
-        st.session_state.page = 2
-        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
+    st.session_state.history_diagnosed = st.selectbox('Have you ever been diagnosed with breast cancer or any other type of cancer before?', ['', 'No', 'Yes'], key='history_diagnosed')
+    st.session_state.history_biopsies = st.selectbox('Have you had any previous breast biopsies or surgeries?', ['', 'No', 'Yes'], key='history_biopsies')
+    st.session_state.history_family = st.selectbox('Do you have a family history of breast cancer (e.g., mother, sister, daughter)?', ['', 'No', 'Yes'], key='history_family')
 
-def show_symptoms():
+    if st.button('Next'):
+        set_page('Symptoms and Physical Changes')
+
+if st.session_state.page == 'Symptoms and Physical Changes':
     st.header('Symptoms and Physical Changes')
-    st.session_state.symptoms_lumps = st.selectbox(
-        'Have you noticed any lumps or changes in your breast tissue?',
-        ['', 'No', 'Yes'],
-        key='symptoms_lumps'
-    )
-    st.session_state.symptoms_pain = st.selectbox(
-        'Have you experienced any pain or tenderness in your breasts?',
-        ['', 'No', 'Yes'],
-        key='symptoms_pain'
-    )
-    st.session_state.symptoms_discharge = st.selectbox(
-        'Do you have any nipple discharge or changes in the appearance of your nipples?',
-        ['', 'No', 'Yes'],
-        key='symptoms_discharge'
-    )
-    st.session_state.symptoms_size_change = st.selectbox(
-        'Have you observed any changes in the size, shape, or appearance of your breasts?',
-        ['', 'No', 'Yes'],
-        key='symptoms_size_change'
-    )
-    st.session_state.symptoms_skin_change = st.selectbox(
-        'Have you noticed any skin changes on your breasts, such as dimpling or redness?',
-        ['', 'No', 'Yes'],
-        key='symptoms_skin_change'
-    )
+    st.session_state.symptoms_lumps = st.selectbox('Have you noticed any lumps or changes in your breast tissue?', ['', 'No', 'Yes'], key='symptoms_lumps')
+    st.session_state.symptoms_pain = st.selectbox('Have you experienced any pain or tenderness in your breasts?', ['', 'No', 'Yes'], key='symptoms_pain')
+    st.session_state.symptoms_discharge = st.selectbox('Do you have any nipple discharge or changes in the appearance of your nipples?', ['', 'No', 'Yes'], key='symptoms_discharge')
+    st.session_state.symptoms_size_change = st.selectbox('Have you observed any changes in the size, shape, or appearance of your breasts?', ['', 'No', 'Yes'], key='symptoms_size_change')
+    st.session_state.symptoms_skin_change = st.selectbox('Have you noticed any skin changes on your breasts, such as dimpling or redness?', ['', 'No', 'Yes'], key='symptoms_skin_change')
+
     if st.button('Next'):
-        st.session_state.page = 3
-        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
+        set_page('Screening and Preventive Measures')
 
-def show_screening():
+if st.session_state.page == 'Screening and Preventive Measures':
     st.header('Screening and Preventive Measures')
-    st.session_state.screening_mammogram = st.selectbox(
-        'Have you had a mammogram before, and if so, when was your last one?',
-        ['', 'No', 'Yes'],
-        key='screening_mammogram'
-    )
-    st.session_state.screening_other_tests = st.selectbox(
-        'Have you undergone any other breast cancer screening tests, such as MRI or ultrasound?',
-        ['', 'No', 'Yes'],
-        key='screening_other_tests'
-    )
-    if st.button('Submit'):
-        st.session_state.page = 4
-        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
+    st.session_state.screening_mammogram = st.selectbox('Have you had a mammogram before, and if so, when was your last one?', ['', 'No', 'Yes'], key='screening_mammogram')
+    st.session_state.screening_other_tests = st.selectbox('Have you undergone any other breast cancer screening tests, such as MRI or ultrasound?', ['', 'No', 'Yes'], key='screening_other_tests')
 
-def show_results():
-    st.header('Assessment Results')
-    input_data = pd.DataFrame({
-        'history_diagnosed': [1 if st.session_state.history_diagnosed == 'Yes' else 0],
-        'history_biopsies': [1 if st.session_state.history_biopsies == 'Yes' else 0],
-        'history_family': [1 if st.session_state.history_family == 'Yes' else 0],
-        'symptoms_lumps': [1 if st.session_state.symptoms_lumps == 'Yes' else 0],
-        'symptoms_pain': [1 if st.session_state.symptoms_pain == 'Yes' else 0],
-        'symptoms_discharge': [1 if st.session_state.symptoms_discharge == 'Yes' else 0],
-        'symptoms_size_change': [1 if st.session_state.symptoms_size_change == 'Yes' else 0],
-        'symptoms_skin_change': [1 if st.session_state.symptoms_skin_change == 'Yes' else 0],
-        'screening_mammogram': [1 if st.session_state.screening_mammogram == 'Yes' else 0],
-        'screening_other_tests': [1 if st.session_state.screening_other_tests == 'Yes' else 0]
-    })
-    
-    if not input_data.isnull().values.any():
+    if st.button('Show Results'):
+        set_page('Show Results')
+
+if st.session_state.page == 'Show Results':
+    # Convert user inputs to binary values
+    if '' in [st.session_state.history_diagnosed, st.session_state.history_biopsies, st.session_state.history_family, st.session_state.symptoms_lumps, st.session_state.symptoms_pain, st.session_state.symptoms_discharge, st.session_state.symptoms_size_change, st.session_state.symptoms_skin_change, st.session_state.screening_mammogram, st.session_state.screening_other_tests]:
+        st.warning('Please complete all the questions in the previous sections.')
+    else:
+        input_data = pd.DataFrame({
+            'history_diagnosed': [1 if st.session_state.history_diagnosed == 'Yes' else 0],
+            'history_biopsies': [1 if st.session_state.history_biopsies == 'Yes' else 0],
+            'history_family': [1 if st.session_state.history_family == 'Yes' else 0],
+            'symptoms_lumps': [1 if st.session_state.symptoms_lumps == 'Yes' else 0],
+            'symptoms_pain': [1 if st.session_state.symptoms_pain == 'Yes' else 0],
+            'symptoms_discharge': [1 if st.session_state.symptoms_discharge == 'Yes' else 0],
+            'symptoms_size_change': [1 if st.session_state.symptoms_size_change == 'Yes' else 0],
+            'symptoms_skin_change': [1 if st.session_state.symptoms_skin_change == 'Yes' else 0],
+            'screening_mammogram': [1 if st.session_state.screening_mammogram == 'Yes' else 0],
+            'screening_other_tests': [1 if st.session_state.screening_other_tests == 'Yes' else 0]
+        })
+        # Make prediction
         prediction = model.predict(input_data)[0]
-        if prediction == 1:
-            st.error("Based on your responses, there might be a higher risk of breast cancer. Please consult a healthcare professional for further evaluation.")
-        else:
-            st.success("Based on your responses, the risk of breast cancer appears to be lower. However, please continue regular check-ups and screenings.")
-        
-        # Personalized suggestions based on input data
+
+        # Define personalized suggestions based on user inputs
         suggestions = []
         if st.session_state.history_diagnosed == 'Yes':
-            suggestions.append("You have a history of cancer. Regular follow-ups with your healthcare provider are crucial.")
+            suggestions.append("Consult your healthcare provider for regular follow-ups and screenings.")
         if st.session_state.history_biopsies == 'Yes':
-            suggestions.append("You have had previous breast biopsies. Keep your healthcare provider informed about any changes.")
+            suggestions.append("Inform your doctor about any previous biopsies or surgeries during consultations.")
         if st.session_state.history_family == 'Yes':
-            suggestions.append("A family history of breast cancer increases your risk. Genetic counseling may be beneficial.")
+            suggestions.append("Discuss genetic counseling and testing options with your healthcare provider.")
         if st.session_state.symptoms_lumps == 'Yes':
-            suggestions.append("You have noticed lumps. Schedule a clinical breast exam for further evaluation.")
+            suggestions.append("Schedule an appointment with your doctor to evaluate any lumps or changes in your breast tissue.")
         if st.session_state.symptoms_pain == 'Yes':
-            suggestions.append("You are experiencing breast pain. Consult with your healthcare provider for advice.")
+            suggestions.append("Consult your healthcare provider if you experience persistent breast pain.")
         if st.session_state.symptoms_discharge == 'Yes':
-            suggestions.append("You have nipple discharge. It is important to get this symptom evaluated by a healthcare provider.")
+            suggestions.append("Report any nipple discharge or changes to your healthcare provider.")
         if st.session_state.symptoms_size_change == 'Yes':
-            suggestions.append("Changes in breast size or shape should be assessed by a healthcare provider.")
+            suggestions.append("Keep track of any changes in the size, shape, or appearance of your breasts and inform your healthcare provider.")
         if st.session_state.symptoms_skin_change == 'Yes':
-            suggestions.append("Skin changes on the breast require medical attention. Schedule a check-up.")
-        if st.session_state.screening_mammogram == 'No':
-            suggestions.append("Consider scheduling your first mammogram. Early detection is key.")
-        if st.session_state.screening_other_tests == 'No':
-            suggestions.append("Other screening tests like MRI or ultrasound might be useful. Discuss with your healthcare provider.")
+            suggestions.append("Report any skin changes, such as dimpling or redness, to your healthcare provider.")
+        if st.session_state.screening_mammogram == 'Yes':
+            suggestions.append("Ensure you continue regular mammograms as advised by your healthcare provider.")
+        if st.session_state.screening_other_tests == 'Yes':
+            suggestions.append("Discuss any additional screening tests with your healthcare provider to ensure comprehensive monitoring.")
 
+        # Display the prediction result
+        st.write("### Prediction Result")
+        if prediction == 0:
+            st.write("**Low Risk**: Your responses indicate a lower risk for breast cancer. However, it is essential to continue regular screenings and consultations with your healthcare provider.")
+        else:
+            st.write("**High Risk**: Your responses suggest a higher risk for breast cancer. Please consult your healthcare provider for further evaluation and necessary screenings.")
+
+        # Display personalized suggestions
         st.write("### Personalized Suggestions")
         for suggestion in suggestions:
             st.write(f"- {suggestion}")
 
+        # Visualize the input data
         input_data_visual = input_data.T.reset_index()
         input_data_visual.columns = ['Feature', 'Value']
         fig = px.bar(input_data_visual, x='Feature', y='Value', title='User Input Data')
         st.plotly_chart(fig)
-    else:
-        st.warning('Please complete all the questions in the previous sections.')
 
-def show_feedback():
+        if st.button('Back to Home'):
+            set_page('Home')
+
+if st.session_state.page == 'Feedback':
     st.header('Feedback')
-    feedback = st.text_area("Please provide your feedback here:")
+    st.session_state.feedback = st.text_area("Please provide your feedback here:", key='feedback')
     if st.button('Submit Feedback'):
         st.write('Thank you for your feedback!')
-
-def main():
-    if st.session_state.page == 0:
-        show_home()
-    elif st.session_state.page == 1:
-        show_history()
-    elif st.session_state.page == 2:
-        show_symptoms()
-    elif st.session_state.page == 3:
-        show_screening()
-    elif st.session_state.page == 4:
-        show_results()
-    elif st.session_state.page == 5:
-        show_feedback()
-
-if __name__ == "__main__":
-    main()
+        set_page('Home')
