@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
+import plotly.express as px
 
 # Initialize session state variables
 if 'page' not in st.session_state:
@@ -72,6 +73,7 @@ def show_home():
     """)
     if st.button('Start Assessment'):
         st.session_state.page = 1
+        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
 
 def show_history():
     st.header('Personal and Family Medical History')
@@ -92,6 +94,7 @@ def show_history():
     )
     if st.button('Next'):
         st.session_state.page = 2
+        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
 
 def show_symptoms():
     st.header('Symptoms and Physical Changes')
@@ -122,6 +125,7 @@ def show_symptoms():
     )
     if st.button('Next'):
         st.session_state.page = 3
+        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
 
 def show_screening():
     st.header('Screening and Preventive Measures')
@@ -137,6 +141,7 @@ def show_screening():
     )
     if st.button('Submit'):
         st.session_state.page = 4
+        st.experimental_rerun()  # Add this to force a rerun when the button is clicked
 
 def show_results():
     st.header('Assessment Results')
@@ -152,19 +157,67 @@ def show_results():
         'screening_mammogram': [1 if st.session_state.screening_mammogram == 'Yes' else 0],
         'screening_other_tests': [1 if st.session_state.screening_other_tests == 'Yes' else 0]
     })
-    prediction = model.predict(input_data)[0]
-    if prediction == 1:
-        st.error("Based on your responses, there might be a higher risk of breast cancer. Please consult a healthcare professional for further evaluation.")
-    else:
-        st.success("Based on your responses, the risk of breast cancer appears to be lower. However, please continue regular check-ups and screenings.")
+    
+    if not input_data.isnull().values.any():
+        prediction = model.predict(input_data)[0]
+        if prediction == 1:
+            st.error("Based on your responses, there might be a higher risk of breast cancer. Please consult a healthcare professional for further evaluation.")
+        else:
+            st.success("Based on your responses, the risk of breast cancer appears to be lower. However, please continue regular check-ups and screenings.")
+        
+        # Personalized suggestions based on input data
+        suggestions = []
+        if st.session_state.history_diagnosed == 'Yes':
+            suggestions.append("You have a history of cancer. Regular follow-ups with your healthcare provider are crucial.")
+        if st.session_state.history_biopsies == 'Yes':
+            suggestions.append("You have had previous breast biopsies. Keep your healthcare provider informed about any changes.")
+        if st.session_state.history_family == 'Yes':
+            suggestions.append("A family history of breast cancer increases your risk. Genetic counseling may be beneficial.")
+        if st.session_state.symptoms_lumps == 'Yes':
+            suggestions.append("You have noticed lumps. Schedule a clinical breast exam for further evaluation.")
+        if st.session_state.symptoms_pain == 'Yes':
+            suggestions.append("You are experiencing breast pain. Consult with your healthcare provider for advice.")
+        if st.session_state.symptoms_discharge == 'Yes':
+            suggestions.append("You have nipple discharge. It is important to get this symptom evaluated by a healthcare provider.")
+        if st.session_state.symptoms_size_change == 'Yes':
+            suggestions.append("Changes in breast size or shape should be assessed by a healthcare provider.")
+        if st.session_state.symptoms_skin_change == 'Yes':
+            suggestions.append("Skin changes on the breast require medical attention. Schedule a check-up.")
+        if st.session_state.screening_mammogram == 'No':
+            suggestions.append("Consider scheduling your first mammogram. Early detection is key.")
+        if st.session_state.screening_other_tests == 'No':
+            suggestions.append("Other screening tests like MRI or ultrasound might be useful. Discuss with your healthcare provider.")
 
-    st.header('Personalized Suggestions')
-    suggestions = []
-    if st.session_state.history_diagnosed == 'Yes':
-        suggestions.append("Consult your healthcare provider for regular follow-ups and screenings.")
-    if st.session_state.history_biopsies == 'Yes':
-        suggestions.append("Inform your doctor about any previous biopsies or surgeries during consultations.")
-    if st.session_state.history_family == 'Yes':
-        suggestions.append("Discuss genetic counseling and testing options with your healthcare provider.")
-    if st.session_state.symptoms_lumps == 'Yes':
-        suggestions.append("Schedule a clinical breast exam and consider imaging tests.")
+        st.write("### Personalized Suggestions")
+        for suggestion in suggestions:
+            st.write(f"- {suggestion}")
+
+        input_data_visual = input_data.T.reset_index()
+        input_data_visual.columns = ['Feature', 'Value']
+        fig = px.bar(input_data_visual, x='Feature', y='Value', title='User Input Data')
+        st.plotly_chart(fig)
+    else:
+        st.warning('Please complete all the questions in the previous sections.')
+
+def show_feedback():
+    st.header('Feedback')
+    feedback = st.text_area("Please provide your feedback here:")
+    if st.button('Submit Feedback'):
+        st.write('Thank you for your feedback!')
+
+def main():
+    if st.session_state.page == 0:
+        show_home()
+    elif st.session_state.page == 1:
+        show_history()
+    elif st.session_state.page == 2:
+        show_symptoms()
+    elif st.session_state.page == 3:
+        show_screening()
+    elif st.session_state.page == 4:
+        show_results()
+    elif st.session_state.page == 5:
+        show_feedback()
+
+if __name__ == "__main__":
+    main()
